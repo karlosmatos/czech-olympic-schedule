@@ -125,6 +125,14 @@ private let eventTermsCZ: [(String, String)] = [
     ("Elimination Run", "Vyřazovací jízda"),
     ("Qualification Playoffs", "Kvalifikační play-off"),
     ("Qualification Run", "Kvalifikační jízda"),
+    ("Preliminary", "Předkolo"),
+    ("Rescheduled", "Přeloženo"),
+    ("Seeding Run", "Nasazovací jízda"),
+]
+
+private let wordFallbacksCZ: [(String, String)] = [
+    ("Official", "Oficiální"),
+    ("PGS", "PGS"),
 ]
 
 func czechSportName(_ english: String) -> String {
@@ -138,6 +146,10 @@ func czechSportName(_ english: String) -> String {
 func czechEventDetail(_ english: String) -> String {
     var result = english
     for (eng, cz) in eventTermsCZ {
+        result = result.replacingOccurrences(of: eng, with: cz)
+    }
+    // Word-level fallback for standalone terms not caught by phrase replacements
+    for (eng, cz) in wordFallbacksCZ {
         result = result.replacingOccurrences(of: eng, with: cz)
     }
     return result
