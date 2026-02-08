@@ -19,9 +19,9 @@ Click the 🏔️ icon in your menu bar to see today's Olympic events at a glanc
 - **Medal & live counters** — header shows total medals, Czech events, and live event count
 - **Czech localization** — all sport names and event details translated to Czech
 
-## Screenshots
+## Screenshot
 
-*Coming soon — the Games start February 6, 2026!*
+![Czech Olympic Schedule](screenshot.png)
 
 ## Requirements
 
