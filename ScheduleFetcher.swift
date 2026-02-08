@@ -8,6 +8,7 @@ class ScheduleFetcher {
     private var cacheTimestamps: [String: Date] = [:]
     private let cacheLifetime: TimeInterval = 25
     private var activeTasks: [String: URLSessionDataTask] = [:]
+    private let queue = DispatchQueue(label: "com.czech-olympic.fetcher", qos: .userInitiated)
 
     var onDataLoaded: (([APIUnit], String) -> Void)?
     var onError: ((String) -> Void)?
@@ -35,13 +36,19 @@ class ScheduleFetcher {
     func fetch(for date: Date, forceRefresh: Bool = false) {
         let key = dateKey(date)
 
-        if !forceRefresh, let cached = cache[key],
-           let ts = cacheTimestamps[key], Date().timeIntervalSince(ts) < cacheLifetime {
+        var cachedUnits: [APIUnit]?
+        queue.sync {
+            if !forceRefresh, let cached = cache[key],
+               let ts = cacheTimestamps[key], Date().timeIntervalSince(ts) < cacheLifetime {
+                cachedUnits = cached
+            }
+        }
+        if let cached = cachedUnits {
             onDataLoaded?(cached, key)
             return
         }
 
-        activeTasks[key]?.cancel()
+        queue.sync { activeTasks[key]?.cancel() }
 
         guard let url = URL(string: baseURL + key) else {
             onError?("Invalid URL")
@@ -72,8 +79,10 @@ class ScheduleFetcher {
                 let decoded = try JSONDecoder().decode(APIResponse.self, from: data)
                 let allUnits = decoded.units ?? []
                 let units = allUnits.filter { $0.olympicDay == key }
-                self.cache[key] = units
-                self.cacheTimestamps[key] = Date()
+                self.queue.sync {
+                    self.cache[key] = units
+                    self.cacheTimestamps[key] = Date()
+                }
                 DispatchQueue.main.async {
                     self.onDataLoaded?(units, key)
                 }
@@ -81,8 +90,10 @@ class ScheduleFetcher {
                 do {
                     let allUnits = try JSONDecoder().decode([APIUnit].self, from: data)
                     let units = allUnits.filter { $0.olympicDay == key }
-                    self.cache[key] = units
-                    self.cacheTimestamps[key] = Date()
+                    self.queue.sync {
+                        self.cache[key] = units
+                        self.cacheTimestamps[key] = Date()
+                    }
                     DispatchQueue.main.async {
                         self.onDataLoaded?(units, key)
                     }
@@ -94,7 +105,7 @@ class ScheduleFetcher {
             }
         }
 
-        activeTasks[key] = task
+        queue.sync { activeTasks[key] = task }
         task.resume()
     }
 

@@ -9,7 +9,6 @@ enum Theme {
     static let eventRowHoverBg = NSColor(white: 0.5, alpha: 0.05)
     static let countBadgeBg = NSColor(white: 0.5, alpha: 0.08)
     static let liveBadgeBg = NSColor.systemRed
-    static let cardBg = NSColor(white: 0.5, alpha: 0.03)
     static let filterActiveBg = NSColor(red: 0.30, green: 0.60, blue: 1.0, alpha: 0.15)
     static let filterActiveBorder = NSColor(red: 0.30, green: 0.60, blue: 1.0, alpha: 0.4)
     static let filterInactiveBg = NSColor(white: 0.5, alpha: 0.06)
@@ -21,11 +20,9 @@ enum Theme {
     static let popoverHeight: CGFloat = 600
     static let sectionHeaderHeight: CGFloat = 36
     static let eventRowCollapsed: CGFloat = 38
-    static let cardInset: CGFloat = 12
     static let cardCornerRadius: CGFloat = 8
     static let cardSpacing: CGFloat = 2
     static let sectionSpacing: CGFloat = 8
-    static let contentPadding: CGFloat = 12
 
     // MARK: - Fonts
     static let titleFont = NSFont.systemFont(ofSize: 14, weight: .semibold)
@@ -36,11 +33,8 @@ enum Theme {
     static let scoreFont = NSFont.monospacedDigitSystemFont(ofSize: 13, weight: .bold)
     static let smallFont = NSFont.systemFont(ofSize: 10)
     static let badgeFont = NSFont.systemFont(ofSize: 9, weight: .bold)
-    static let disclosureFont = NSFont.systemFont(ofSize: 9, weight: .medium)
-    static let disclosureSmallFont = NSFont.systemFont(ofSize: 8, weight: .medium)
     static let countFont = NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .medium)
     static let emojiFont = NSFont.systemFont(ofSize: 14)
-    static let filterFont = NSFont.systemFont(ofSize: 11)
     static let filterPillFont = NSFont.systemFont(ofSize: 11, weight: .medium)
     static let counterFont = NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .semibold)
     static let statusFont = NSFont.systemFont(ofSize: 9, weight: .medium)
@@ -54,6 +48,5 @@ enum Theme {
     static let flagFont = NSFont.systemFont(ofSize: 12)
     static let flagSmallFont = NSFont.systemFont(ofSize: 11)
     static let todayBtnFont = NSFont.systemFont(ofSize: 11, weight: .medium)
-    static let countLabelFont = NSFont.systemFont(ofSize: 11, weight: .medium)
     static let sectionEmojiFont = NSFont.systemFont(ofSize: 15)
 }

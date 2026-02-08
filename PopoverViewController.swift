@@ -367,11 +367,16 @@ class PopoverViewController: NSViewController {
 
     // MARK: - Data Loading
 
+    private static let czechDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "cs_CZ")
+        f.dateFormat = "EEEE d. MMMM"
+        return f
+    }()
+
     func updateEvents() {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "cs_CZ")
-        formatter.dateFormat = "EEEE d. MMMM"
-        let dayStr = formatter.string(from: currentDate)
+        isUsingAPI = false
+        let dayStr = Self.czechDateFormatter.string(from: currentDate)
 
         let cal = Calendar.current
         let dayOfMonth = cal.component(.day, from: currentDate)
