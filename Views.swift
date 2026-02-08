@@ -24,6 +24,7 @@ class FlippedClipView: NSClipView {
 
 class SportSectionHeaderView: NSView {
     var onToggle: (() -> Void)?
+    var onToggleAll: ((Bool) -> Void)?  // Option-click: expand/collapse all
     private var isExpanded: Bool
     private let disclosureLabel: NSTextField
 
@@ -105,10 +106,17 @@ class SportSectionHeaderView: NSView {
         addGestureRecognizer(click)
     }
 
-    @objc func handleClick() {
-        isExpanded = !isExpanded
-        disclosureLabel.stringValue = isExpanded ? "▾" : "▸"
-        onToggle?()
+    @objc func handleClick(_ gesture: NSClickGestureRecognizer) {
+        let optionHeld = NSEvent.modifierFlags.contains(.option)
+        if optionHeld {
+            isExpanded = !isExpanded
+            disclosureLabel.stringValue = isExpanded ? "▾" : "▸"
+            onToggleAll?(isExpanded)
+        } else {
+            isExpanded = !isExpanded
+            disclosureLabel.stringValue = isExpanded ? "▾" : "▸"
+            onToggle?()
+        }
     }
 
     override func updateTrackingAreas() {
