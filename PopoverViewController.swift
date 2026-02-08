@@ -154,6 +154,18 @@ class PopoverViewController: NSViewController {
         livePill.frame = NSRect(x: 190, y: 6, width: 64, height: 24)
         filterBar.addSubview(livePill)
 
+        let expandBtn = NSButton(title: "▾ Vše", target: self, action: #selector(expandAll))
+        expandBtn.bezelStyle = .inline
+        expandBtn.font = Theme.filterPillFont
+        expandBtn.frame = NSRect(x: 264, y: 6, width: 44, height: 24)
+        filterBar.addSubview(expandBtn)
+
+        let collapseBtn = NSButton(title: "▸ Vše", target: self, action: #selector(collapseAll))
+        collapseBtn.bezelStyle = .inline
+        collapseBtn.font = Theme.filterPillFont
+        collapseBtn.frame = NSRect(x: 312, y: 6, width: 44, height: 24)
+        filterBar.addSubview(collapseBtn)
+
         statusLabel = NSTextField(labelWithString: "")
         statusLabel.font = Theme.statusFont
         statusLabel.textColor = .tertiaryLabelColor
@@ -300,6 +312,21 @@ class PopoverViewController: NSViewController {
     @objc func toggleLiveFilter(_ sender: NSButton) {
         liveOnly = !liveOnly
         updatePillState(sender, active: liveOnly)
+        rebuildUI()
+    }
+
+    @objc func expandAll() {
+        for i in 0..<sections.count {
+            sections[i].isExpanded = true
+        }
+        rebuildUI()
+    }
+
+    @objc func collapseAll() {
+        for i in 0..<sections.count {
+            sections[i].isExpanded = false
+        }
+        expandedEvents.removeAll()
         rebuildUI()
     }
 
