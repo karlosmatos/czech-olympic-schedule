@@ -8,11 +8,23 @@ class PopoverViewController: NSViewController {
     private var stackView: NSStackView!
     private var datePicker: NSDatePicker!
     private var headerLabel: NSTextField!
-    private var countLabel: NSTextField!
     private var prevButton: NSButton!
     private var nextButton: NSButton!
     private var statusLabel: NSTextField!
     private var loadingSpinner: NSProgressIndicator!
+
+    // Counter mini-badges
+    private var medalBadge: NSView!
+    private var czechBadge: NSView!
+    private var liveBadge: NSView!
+    private var medalBadgeLabel: NSTextField!
+    private var czechBadgeLabel: NSTextField!
+    private var liveBadgeLabel: NSTextField!
+
+    // Filter pill buttons
+    private var czechPill: NSButton!
+    private var medalPill: NSButton!
+    private var livePill: NSButton!
 
     private var sections: [SportSection] = []
     private var expandedEvents: Set<String> = []
@@ -38,37 +50,64 @@ class PopoverViewController: NSViewController {
         effectView.state = .active
         container.addSubview(effectView)
 
-        // Title bar
-        let titleBar = NSView(frame: NSRect(x: 0, y: Theme.popoverHeight - 50, width: Theme.popoverWidth, height: 50))
+        // MARK: Title bar (48pt)
+        let titleBarHeight: CGFloat = 48
+        let titleBar = NSView(frame: NSRect(x: 0, y: Theme.popoverHeight - titleBarHeight, width: Theme.popoverWidth, height: titleBarHeight))
 
-        let olympicRings = NSTextField(labelWithString: "🏔️ ZOH Milano Cortina 2026")
+        let olympicRings = NSTextField(labelWithString: "🏔️ ZOH 2026")
         olympicRings.font = Theme.titleFont
         olympicRings.textColor = .labelColor
-        olympicRings.frame = NSRect(x: 14, y: 14, width: 280, height: 22)
+        olympicRings.frame = NSRect(x: 16, y: 14, width: 140, height: 20)
         titleBar.addSubview(olympicRings)
 
-        countLabel = NSTextField(labelWithString: "")
-        countLabel.font = Theme.countLabelFont
-        countLabel.textColor = .secondaryLabelColor
-        countLabel.alignment = .right
-        countLabel.frame = NSRect(x: Theme.popoverWidth - 200, y: 14, width: 186, height: 18)
-        titleBar.addSubview(countLabel)
+        // Mini-badge counters (right-aligned)
+        let badgeW: CGFloat = 60
+        let badgeH: CGFloat = 24
+        let badgeY: CGFloat = 12
+        let badgeGap: CGFloat = 6
+        var badgeRight: CGFloat = Theme.popoverWidth - 14
+
+        // Live badge (rightmost, only shown when live > 0)
+        let liveResult = makeBadgeView(text: "🔴 0", tintColor: Theme.liveRed.withAlphaComponent(0.12))
+        liveBadge = liveResult.view
+        liveBadgeLabel = liveResult.label
+        liveBadge.frame = NSRect(x: badgeRight - badgeW, y: badgeY, width: badgeW, height: badgeH)
+        liveBadge.isHidden = true
+        titleBar.addSubview(liveBadge)
+
+        // Czech badge
+        badgeRight -= (badgeW + badgeGap)
+        let czechResult = makeBadgeView(text: "🇨🇿 0", tintColor: Theme.czechBlue.withAlphaComponent(0.10))
+        czechBadge = czechResult.view
+        czechBadgeLabel = czechResult.label
+        czechBadge.frame = NSRect(x: badgeRight - badgeW, y: badgeY, width: badgeW, height: badgeH)
+        titleBar.addSubview(czechBadge)
+
+        // Medal badge
+        badgeRight -= (badgeW + badgeGap)
+        let medalResult = makeBadgeView(text: "🥇 0", tintColor: Theme.medalGold.withAlphaComponent(0.12))
+        medalBadge = medalResult.view
+        medalBadgeLabel = medalResult.label
+        medalBadge.frame = NSRect(x: badgeRight - badgeW, y: badgeY, width: badgeW, height: badgeH)
+        titleBar.addSubview(medalBadge)
 
         let sep1 = NSBox(frame: NSRect(x: 0, y: 0, width: Theme.popoverWidth, height: 1))
         sep1.boxType = .separator
         titleBar.addSubview(sep1)
         container.addSubview(titleBar)
 
-        // Date navigation bar
-        let dateBar = NSView(frame: NSRect(x: 0, y: Theme.popoverHeight - 96, width: Theme.popoverWidth, height: 46))
+        // MARK: Date navigation bar (42pt)
+        let dateBarHeight: CGFloat = 42
+        let dateBarY = Theme.popoverHeight - titleBarHeight - dateBarHeight
+        let dateBar = NSView(frame: NSRect(x: 0, y: dateBarY, width: Theme.popoverWidth, height: dateBarHeight))
 
         prevButton = NSButton(title: "◀", target: self, action: #selector(prevDay))
         prevButton.bezelStyle = .inline
         prevButton.font = Theme.navFont
-        prevButton.frame = NSRect(x: 10, y: 8, width: 30, height: 28)
+        prevButton.frame = NSRect(x: 12, y: 7, width: 30, height: 28)
         dateBar.addSubview(prevButton)
 
-        datePicker = NSDatePicker(frame: NSRect(x: 48, y: 8, width: 180, height: 28))
+        datePicker = NSDatePicker(frame: NSRect(x: 50, y: 7, width: 180, height: 28))
         datePicker.datePickerStyle = .textField
         datePicker.datePickerElements = .yearMonthDay
         datePicker.datePickerMode = .single
@@ -83,13 +122,14 @@ class PopoverViewController: NSViewController {
         nextButton = NSButton(title: "▶", target: self, action: #selector(nextDay))
         nextButton.bezelStyle = .inline
         nextButton.font = Theme.navFont
-        nextButton.frame = NSRect(x: 234, y: 8, width: 30, height: 28)
+        nextButton.frame = NSRect(x: 238, y: 7, width: 30, height: 28)
         dateBar.addSubview(nextButton)
 
         headerLabel = NSTextField(labelWithString: "")
         headerLabel.font = Theme.headerDateFont
         headerLabel.textColor = .secondaryLabelColor
-        headerLabel.frame = NSRect(x: 274, y: 12, width: Theme.popoverWidth - 284, height: 20)
+        headerLabel.lineBreakMode = .byTruncatingTail
+        headerLabel.frame = NSRect(x: 278, y: 11, width: Theme.popoverWidth - 288, height: 20)
         dateBar.addSubview(headerLabel)
 
         let sep2 = NSBox(frame: NSRect(x: 0, y: 0, width: Theme.popoverWidth, height: 1))
@@ -97,38 +137,34 @@ class PopoverViewController: NSViewController {
         dateBar.addSubview(sep2)
         container.addSubview(dateBar)
 
-        // Filter buttons + status
-        let filterBar = NSView(frame: NSRect(x: 0, y: Theme.popoverHeight - 130, width: Theme.popoverWidth, height: 34))
+        // MARK: Filter bar (36pt) — pill-style toggle buttons
+        let filterBarHeight: CGFloat = 36
+        let filterBarY = dateBarY - filterBarHeight
+        let filterBar = NSView(frame: NSRect(x: 0, y: filterBarY, width: Theme.popoverWidth, height: filterBarHeight))
 
-        let czechFilter = NSButton(checkboxWithTitle: "🇨🇿 Jen české", target: self, action: #selector(toggleCzechFilter))
-        czechFilter.font = Theme.filterFont
-        czechFilter.frame = NSRect(x: 14, y: 6, width: 110, height: 20)
-        czechFilter.tag = 100
-        filterBar.addSubview(czechFilter)
+        czechPill = makeFilterPill(title: "🇨🇿 České", tag: 100, action: #selector(toggleCzechFilter))
+        czechPill.frame = NSRect(x: 14, y: 6, width: 78, height: 24)
+        filterBar.addSubview(czechPill)
 
-        let medalFilter = NSButton(checkboxWithTitle: "🥇 O medaile", target: self, action: #selector(toggleMedalFilter))
-        medalFilter.font = Theme.filterFont
-        medalFilter.frame = NSRect(x: 130, y: 6, width: 110, height: 20)
-        medalFilter.tag = 101
-        filterBar.addSubview(medalFilter)
+        medalPill = makeFilterPill(title: "🥇 Medaile", tag: 101, action: #selector(toggleMedalFilter))
+        medalPill.frame = NSRect(x: 98, y: 6, width: 86, height: 24)
+        filterBar.addSubview(medalPill)
 
-        let liveFilter = NSButton(checkboxWithTitle: "🔴 Live", target: self, action: #selector(toggleLiveFilter))
-        liveFilter.font = Theme.filterFont
-        liveFilter.frame = NSRect(x: 246, y: 6, width: 70, height: 20)
-        liveFilter.tag = 102
-        filterBar.addSubview(liveFilter)
+        livePill = makeFilterPill(title: "🔴 Live", tag: 102, action: #selector(toggleLiveFilter))
+        livePill.frame = NSRect(x: 190, y: 6, width: 64, height: 24)
+        filterBar.addSubview(livePill)
 
         statusLabel = NSTextField(labelWithString: "")
         statusLabel.font = Theme.statusFont
         statusLabel.textColor = .tertiaryLabelColor
         statusLabel.alignment = .right
-        statusLabel.frame = NSRect(x: Theme.popoverWidth - 160, y: 8, width: 90, height: 14)
+        statusLabel.frame = NSRect(x: Theme.popoverWidth - 170, y: 8, width: 90, height: 16)
         filterBar.addSubview(statusLabel)
 
         let todayBtn = NSButton(title: "Dnes", target: self, action: #selector(goToday))
         todayBtn.bezelStyle = .inline
         todayBtn.font = Theme.todayBtnFont
-        todayBtn.frame = NSRect(x: Theme.popoverWidth - 60, y: 5, width: 48, height: 22)
+        todayBtn.frame = NSRect(x: Theme.popoverWidth - 62, y: 6, width: 50, height: 24)
         filterBar.addSubview(todayBtn)
 
         let sep3 = NSBox(frame: NSRect(x: 0, y: 0, width: Theme.popoverWidth, height: 1))
@@ -136,9 +172,9 @@ class PopoverViewController: NSViewController {
         filterBar.addSubview(sep3)
         container.addSubview(filterBar)
 
-        // Scrollable event list
-        let scrollAreaHeight = Theme.popoverHeight - 130
-        scrollView = NSScrollView(frame: NSRect(x: 0, y: 0, width: Theme.popoverWidth, height: scrollAreaHeight))
+        // MARK: Scrollable event list
+        let scrollAreaTop = filterBarY
+        scrollView = NSScrollView(frame: NSRect(x: 0, y: 0, width: Theme.popoverWidth, height: scrollAreaTop))
         scrollView.hasVerticalScroller = true
         scrollView.hasHorizontalScroller = false
         scrollView.autohidesScrollers = true
@@ -146,8 +182,9 @@ class PopoverViewController: NSViewController {
 
         stackView = NSStackView(frame: NSRect(x: 0, y: 0, width: Theme.popoverWidth, height: 0))
         stackView.orientation = .vertical
-        stackView.spacing = 1
+        stackView.spacing = Theme.cardSpacing
         stackView.alignment = .leading
+        stackView.edgeInsets = NSEdgeInsets(top: 6, left: 6, bottom: 6, right: 6)
 
         let clipView = FlippedClipView()
         clipView.documentView = stackView
@@ -163,7 +200,7 @@ class PopoverViewController: NSViewController {
         let spinnerSize: CGFloat = 24
         loadingSpinner.frame = NSRect(
             x: (Theme.popoverWidth - spinnerSize) / 2,
-            y: (scrollAreaHeight - spinnerSize) / 2,
+            y: (scrollAreaTop - spinnerSize) / 2,
             width: spinnerSize,
             height: spinnerSize
         )
@@ -196,24 +233,77 @@ class PopoverViewController: NSViewController {
         updateEvents()
     }
 
+    // MARK: - Badge & Pill Helpers
+
+    private func makeBadgeView(text: String, tintColor: NSColor) -> (view: NSView, label: NSTextField) {
+        let badgeHeight: CGFloat = 24
+        let badge = NSView(frame: NSRect(x: 0, y: 0, width: 60, height: badgeHeight))
+        badge.wantsLayer = true
+        badge.layer?.backgroundColor = tintColor.cgColor
+        badge.layer?.cornerRadius = 8
+
+        let label = NSTextField(labelWithString: text)
+        label.font = NSFont.systemFont(ofSize: 11.5, weight: .medium)
+        label.textColor = .labelColor
+        label.alignment = .center
+        label.frame = NSRect(x: 0, y: 0, width: 60, height: 20)
+        badge.addSubview(label)
+
+        return (badge, label)
+    }
+
+    private func makeFilterPill(title: String, tag: Int, action: Selector) -> NSButton {
+        let btn = NSButton(title: title, target: self, action: action)
+        btn.bezelStyle = .smallSquare
+        btn.isBordered = false
+        btn.wantsLayer = true
+        btn.font = Theme.filterPillFont
+        btn.tag = tag
+        btn.layer?.cornerRadius = 12
+        btn.layer?.backgroundColor = Theme.filterInactiveBg.cgColor
+        btn.contentTintColor = .secondaryLabelColor
+        return btn
+    }
+
+    private func updatePillState(_ pill: NSButton, active: Bool) {
+        if active {
+            pill.layer?.backgroundColor = Theme.filterActiveBg.cgColor
+            pill.layer?.borderWidth = 1
+            pill.layer?.borderColor = Theme.filterActiveBorder.cgColor
+            pill.contentTintColor = Theme.czechBlue
+        } else {
+            pill.layer?.backgroundColor = Theme.filterInactiveBg.cgColor
+            pill.layer?.borderWidth = 0
+            pill.layer?.borderColor = nil
+            pill.contentTintColor = .secondaryLabelColor
+        }
+    }
+
+    // MARK: - Filter Actions
+
     private var czechOnly = false
     private var medalOnly = false
     private var liveOnly = false
 
     @objc func toggleCzechFilter(_ sender: NSButton) {
-        czechOnly = sender.state == .on
+        czechOnly = !czechOnly
+        updatePillState(sender, active: czechOnly)
         rebuildUI()
     }
 
     @objc func toggleMedalFilter(_ sender: NSButton) {
-        medalOnly = sender.state == .on
+        medalOnly = !medalOnly
+        updatePillState(sender, active: medalOnly)
         rebuildUI()
     }
 
     @objc func toggleLiveFilter(_ sender: NSButton) {
-        liveOnly = sender.state == .on
+        liveOnly = !liveOnly
+        updatePillState(sender, active: liveOnly)
         rebuildUI()
     }
+
+    // MARK: - Date Navigation
 
     @objc func dateChanged(_ sender: NSDatePicker) {
         currentDate = sender.dateValue
@@ -249,13 +339,14 @@ class PopoverViewController: NSViewController {
         updateEvents()
     }
 
+    // MARK: - Data Loading
+
     func updateEvents() {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "cs_CZ")
         formatter.dateFormat = "EEEE d. MMMM"
         let dayStr = formatter.string(from: currentDate)
 
-        // Olympic Day numbering: Feb 6 = Opening, Feb 7 = Day 1
         let cal = Calendar.current
         let dayOfMonth = cal.component(.day, from: currentDate)
         let monthOfYear = cal.component(.month, from: currentDate)
@@ -273,7 +364,6 @@ class PopoverViewController: NSViewController {
         }
         headerLabel.stringValue = "\(dayStr) (\(dayLabel))"
 
-        // Show loading state
         statusLabel.stringValue = "Načítání..."
         statusLabel.textColor = .tertiaryLabelColor
         loadingSpinner.isHidden = false
@@ -308,6 +398,8 @@ class PopoverViewController: NSViewController {
         rebuildUI(resetScroll: true)
     }
 
+    // MARK: - UI Rebuild
+
     func rebuildUI(resetScroll: Bool = false) {
         var events = allDisplayEvents
 
@@ -321,14 +413,29 @@ class PopoverViewController: NSViewController {
             events = events.filter { $0.isLive }
         }
 
+        // Update counter badges
         let medalCount = allDisplayEvents.filter { $0.isMedal }.count
         let czechCount = allDisplayEvents.filter { $0.hasCzech }.count
         let liveCount = allDisplayEvents.filter { $0.isLive }.count
-        var countStr = "🥇 \(medalCount) medailí  🇨🇿 \(czechCount) českých"
+
+        medalBadgeLabel.stringValue = "🥇 \(medalCount)"
+        czechBadgeLabel.stringValue = "🇨🇿 \(czechCount)"
+        liveBadgeLabel.stringValue = "🔴 \(liveCount)"
+        liveBadge.isHidden = liveCount == 0
+
+        // Reposition badges based on live visibility
+        let rbBadgeW: CGFloat = 60
+        let rbBadgeGap: CGFloat = 6
+        let rbBadgeY: CGFloat = 12
+        var rbRight: CGFloat = Theme.popoverWidth - 14
+
         if liveCount > 0 {
-            countStr += "  🔴 \(liveCount) live"
+            liveBadge.frame.origin = NSPoint(x: rbRight - rbBadgeW, y: rbBadgeY)
+            rbRight -= (rbBadgeW + rbBadgeGap)
         }
-        countLabel.stringValue = countStr
+        czechBadge.frame.origin = NSPoint(x: rbRight - rbBadgeW, y: rbBadgeY)
+        rbRight -= (rbBadgeW + rbBadgeGap)
+        medalBadge.frame.origin = NSPoint(x: rbRight - rbBadgeW, y: rbBadgeY)
 
         // Remember expanded state
         var expandedState: [String: Bool] = [:]
@@ -336,7 +443,6 @@ class PopoverViewController: NSViewController {
             expandedState[s.name] = s.isExpanded
         }
 
-        // Save scroll position before rebuild
         let savedScroll = scrollView.contentView.bounds.origin
 
         sections = ScheduleFetcher.shared.groupBySport(events)
@@ -349,19 +455,31 @@ class PopoverViewController: NSViewController {
 
         stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
 
+        let contentWidth = Theme.popoverWidth - 12  // account for edge insets
+
         if events.isEmpty {
             let emptyLabel = NSTextField(labelWithString: czechOnly || medalOnly || liveOnly ? "Žádné odpovídající události" : "Žádné události tento den")
             emptyLabel.font = Theme.emptyFont
             emptyLabel.textColor = .tertiaryLabelColor
             emptyLabel.alignment = .center
-            emptyLabel.frame = NSRect(x: 0, y: 0, width: Theme.popoverWidth, height: 40)
+            emptyLabel.frame = NSRect(x: 0, y: 0, width: contentWidth, height: 40)
             stackView.addArrangedSubview(emptyLabel)
         } else {
-            var totalHeight: CGFloat = 0
+            var totalHeight: CGFloat = 12  // top padding
             for (sectionIndex, section) in sections.enumerated() {
-                let header = SportSectionHeaderView(section: section, width: Theme.popoverWidth - 8)
+                // Section spacing between groups
+                if sectionIndex > 0 {
+                    let spacer = NSView(frame: NSRect(x: 0, y: 0, width: contentWidth, height: Theme.sectionSpacing))
+                    spacer.translatesAutoresizingMaskIntoConstraints = false
+                    spacer.widthAnchor.constraint(equalToConstant: contentWidth).isActive = true
+                    spacer.heightAnchor.constraint(equalToConstant: Theme.sectionSpacing).isActive = true
+                    stackView.addArrangedSubview(spacer)
+                    totalHeight += Theme.sectionSpacing + Theme.cardSpacing
+                }
+
+                let header = SportSectionHeaderView(section: section, width: contentWidth)
                 header.translatesAutoresizingMaskIntoConstraints = false
-                header.widthAnchor.constraint(equalToConstant: Theme.popoverWidth - 8).isActive = true
+                header.widthAnchor.constraint(equalToConstant: contentWidth).isActive = true
                 header.heightAnchor.constraint(equalToConstant: Theme.sectionHeaderHeight).isActive = true
                 let idx = sectionIndex
                 header.onToggle = { [weak self] in
@@ -370,15 +488,15 @@ class PopoverViewController: NSViewController {
                     self.rebuildUI()
                 }
                 stackView.addArrangedSubview(header)
-                totalHeight += Theme.sectionHeaderHeight + 1
+                totalHeight += Theme.sectionHeaderHeight + Theme.cardSpacing
 
                 if section.isExpanded {
                     for (eventIndex, event) in section.events.enumerated() {
                         let isEventExpanded = expandedEvents.contains(event.id)
                         let rowHeight = EventRowView.height(for: event, expanded: isEventExpanded)
-                        let row = EventRowView(event: event, width: Theme.popoverWidth, expanded: isEventExpanded, rowIndex: eventIndex)
+                        let row = EventRowView(event: event, width: contentWidth, expanded: isEventExpanded, rowIndex: eventIndex)
                         row.translatesAutoresizingMaskIntoConstraints = false
-                        row.widthAnchor.constraint(equalToConstant: Theme.popoverWidth).isActive = true
+                        row.widthAnchor.constraint(equalToConstant: contentWidth).isActive = true
                         row.heightAnchor.constraint(equalToConstant: rowHeight).isActive = true
                         let eventId = event.id
                         row.onToggle = { [weak self] in
@@ -391,15 +509,15 @@ class PopoverViewController: NSViewController {
                             self.rebuildUI()
                         }
                         stackView.addArrangedSubview(row)
-                        totalHeight += rowHeight + 1
+                        totalHeight += rowHeight + Theme.cardSpacing
                     }
                 }
             }
+            totalHeight += 12  // bottom padding
 
             stackView.frame = NSRect(x: 0, y: 0, width: Theme.popoverWidth, height: totalHeight)
         }
 
-        // Restore scroll position
         if resetScroll {
             scrollView.contentView.scroll(to: NSPoint(x: 0, y: 0))
             scrollView.reflectScrolledClipView(scrollView.contentView)
@@ -408,6 +526,8 @@ class PopoverViewController: NSViewController {
             scrollView.reflectScrolledClipView(scrollView.contentView)
         }
     }
+
+    // MARK: - Refresh Timer
 
     func startRefreshTimerIfNeeded() {
         refreshTimer?.invalidate()
