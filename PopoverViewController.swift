@@ -154,6 +154,32 @@ class PopoverViewController: NSViewController {
         livePill.frame = NSRect(x: 190, y: 6, width: 64, height: 24)
         filterBar.addSubview(livePill)
 
+        let helpLabel = NSTextField(labelWithString: "?")
+        helpLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        helpLabel.textColor = .tertiaryLabelColor
+        helpLabel.alignment = .center
+        helpLabel.frame = NSRect(x: 262, y: 8, width: 20, height: 20)
+        helpLabel.wantsLayer = true
+        helpLabel.layer?.backgroundColor = NSColor(white: 0.5, alpha: 0.08).cgColor
+        helpLabel.layer?.cornerRadius = 10
+        helpLabel.toolTip = """
+        Filtry:
+        🇨🇿 České — zobrazit pouze české události
+        🥇 Medaile — zobrazit pouze medailové události
+        🔴 Live — zobrazit pouze probíhající události
+
+        Ovládání:
+        Klik na sport — rozbalit/sbalit sekci
+        ⌥ Option + klik — rozbalit/sbalit vše
+        Klik na událost — zobrazit detail a výsledky
+        Dnes — přejít na aktuální den
+
+        Stav:
+        ● Online — data z olympics.com
+        ○ Offline — záložní lokální data
+        """
+        filterBar.addSubview(helpLabel)
+
         statusLabel = NSTextField(labelWithString: "")
         statusLabel.font = Theme.statusFont
         statusLabel.textColor = .tertiaryLabelColor
