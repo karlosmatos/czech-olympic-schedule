@@ -106,11 +106,17 @@ class PopoverViewController: NSViewController {
         czechFilter.tag = 100
         filterBar.addSubview(czechFilter)
 
-        let medalFilter = NSButton(checkboxWithTitle: "🥇 Jen medaile", target: self, action: #selector(toggleMedalFilter))
+        let medalFilter = NSButton(checkboxWithTitle: "🥇 O medaile", target: self, action: #selector(toggleMedalFilter))
         medalFilter.font = Theme.filterFont
-        medalFilter.frame = NSRect(x: 130, y: 6, width: 120, height: 20)
+        medalFilter.frame = NSRect(x: 130, y: 6, width: 110, height: 20)
         medalFilter.tag = 101
         filterBar.addSubview(medalFilter)
+
+        let liveFilter = NSButton(checkboxWithTitle: "🔴 Live", target: self, action: #selector(toggleLiveFilter))
+        liveFilter.font = Theme.filterFont
+        liveFilter.frame = NSRect(x: 246, y: 6, width: 70, height: 20)
+        liveFilter.tag = 102
+        filterBar.addSubview(liveFilter)
 
         statusLabel = NSTextField(labelWithString: "")
         statusLabel.font = Theme.statusFont
@@ -192,6 +198,7 @@ class PopoverViewController: NSViewController {
 
     private var czechOnly = false
     private var medalOnly = false
+    private var liveOnly = false
 
     @objc func toggleCzechFilter(_ sender: NSButton) {
         czechOnly = sender.state == .on
@@ -200,6 +207,11 @@ class PopoverViewController: NSViewController {
 
     @objc func toggleMedalFilter(_ sender: NSButton) {
         medalOnly = sender.state == .on
+        rebuildUI()
+    }
+
+    @objc func toggleLiveFilter(_ sender: NSButton) {
+        liveOnly = sender.state == .on
         rebuildUI()
     }
 
@@ -305,6 +317,9 @@ class PopoverViewController: NSViewController {
         if medalOnly {
             events = events.filter { $0.isMedal }
         }
+        if liveOnly {
+            events = events.filter { $0.isLive }
+        }
 
         let medalCount = allDisplayEvents.filter { $0.isMedal }.count
         let czechCount = allDisplayEvents.filter { $0.hasCzech }.count
@@ -335,7 +350,7 @@ class PopoverViewController: NSViewController {
         stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
 
         if events.isEmpty {
-            let emptyLabel = NSTextField(labelWithString: czechOnly || medalOnly ? "Žádné odpovídající události" : "Žádné události tento den")
+            let emptyLabel = NSTextField(labelWithString: czechOnly || medalOnly || liveOnly ? "Žádné odpovídající události" : "Žádné události tento den")
             emptyLabel.font = Theme.emptyFont
             emptyLabel.textColor = .tertiaryLabelColor
             emptyLabel.alignment = .center

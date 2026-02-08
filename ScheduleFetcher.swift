@@ -182,7 +182,7 @@ class ScheduleFetcher {
             let hasCzech = entry.events.contains { $0.hasCzech }
             return SportSection(
                 name: entry.name,
-                emoji: emojiForSport(entry.name),
+                emoji: entry.events.first?.emoji ?? "🏅",
                 events: entry.events,
                 isExpanded: hasCzech || hasLive,
                 hasLive: hasLive,
