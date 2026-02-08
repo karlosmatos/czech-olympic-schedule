@@ -107,14 +107,11 @@ class SportSectionHeaderView: NSView {
     }
 
     @objc func handleClick(_ gesture: NSClickGestureRecognizer) {
-        let optionHeld = NSEvent.modifierFlags.contains(.option)
-        if optionHeld {
-            isExpanded = !isExpanded
-            disclosureLabel.stringValue = isExpanded ? "▾" : "▸"
+        isExpanded = !isExpanded
+        disclosureLabel.stringValue = isExpanded ? "▾" : "▸"
+        if NSEvent.modifierFlags.contains(.option) {
             onToggleAll?(isExpanded)
         } else {
-            isExpanded = !isExpanded
-            disclosureLabel.stringValue = isExpanded ? "▾" : "▸"
             onToggle?()
         }
     }
