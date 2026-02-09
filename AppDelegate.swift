@@ -11,8 +11,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem.button {
-            button.title = "🏔️"
-            button.font = Theme.emojiFont
+            if let iconPath = Bundle.main.path(forResource: "menubar-icon", ofType: "png"),
+               let icon = NSImage(contentsOfFile: iconPath) {
+                icon.isTemplate = true
+                icon.size = NSSize(width: 34, height: 16)
+                button.image = icon
+            } else {
+                button.title = "🏔️"
+                button.font = Theme.emojiFont
+            }
             button.action = #selector(togglePopover)
             button.target = self
             button.toolTip = "Czech Olympic Schedule – Milano Cortina 2026"

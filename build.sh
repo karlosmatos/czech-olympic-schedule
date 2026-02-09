@@ -20,6 +20,10 @@ mkdir -p "$APP_BUNDLE/Contents/Resources"
 # Move binary
 mv "$APP_NAME" "$APP_BUNDLE/Contents/MacOS/"
 
+# Copy menu bar icon assets
+cp menubar-icon.png "$APP_BUNDLE/Contents/Resources/"
+cp menubar-icon@2x.png "$APP_BUNDLE/Contents/Resources/"
+
 # Create Info.plist (LSUIElement=true hides from Dock)
 cat > "$APP_BUNDLE/Contents/Info.plist" << 'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
