@@ -41,6 +41,9 @@ bash build.sh
 
 # Run
 open CzechOlympicSchedule.app
+
+# Install to Applications (optional)
+cp -r CzechOlympicSchedule.app /Applications/
 ```
 
 The build script compiles all Swift files into a `.app` bundle with a single `swiftc` command. No dependencies, no CocoaPods, no SPM.
@@ -59,6 +62,7 @@ The app is built entirely with **AppKit** (no SwiftUI, no Interface Builder) and
 ├── FallbackSchedule.swift      # Hardcoded schedule (offline fallback)
 ├── Localization.swift          # Czech translations & sport emoji mapping
 ├── Theme.swift                 # Colors, fonts, dimensions
+├── AppIcon.icns                # App icon (Olympic rings)
 └── build.sh                    # Build script (swiftc → .app bundle)
 ```
 

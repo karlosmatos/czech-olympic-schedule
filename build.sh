@@ -24,6 +24,9 @@ mv "$APP_NAME" "$APP_BUNDLE/Contents/MacOS/"
 cp menubar-icon.png "$APP_BUNDLE/Contents/Resources/"
 cp menubar-icon@2x.png "$APP_BUNDLE/Contents/Resources/"
 
+# Copy app icon
+cp AppIcon.icns "$APP_BUNDLE/Contents/Resources/"
+
 # Create Info.plist (LSUIElement=true hides from Dock)
 cat > "$APP_BUNDLE/Contents/Info.plist" << 'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -42,6 +45,8 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << 'PLIST'
     <string>1.0</string>
     <key>CFBundleShortVersionString</key>
     <string>1.0</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>LSUIElement</key>
